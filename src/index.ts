@@ -1,5 +1,3 @@
-// package.json dependencies needed:
-// "express", "cors", "@prisma/client", "typescript", "dotenv", "@types/express", "@types/cors", "@types/node"
 
 import express from 'express';
 import cors from 'cors';
@@ -12,6 +10,10 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 app.use(cors());
 app.use(express.json());
 
@@ -204,7 +206,9 @@ app.post('/identify', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+
+
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Bitespeed Identity Service running on port ${PORT}`);
 });
 
