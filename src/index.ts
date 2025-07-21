@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { PrismaClient, Contact, LinkPrecedence } from '@prisma/client';
 import dotenv from 'dotenv';
-
+import { Request, Response } from 'express';
 dotenv.config();
 
 const app = express();
@@ -11,7 +11,9 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
 
-
+app.get('/health', (req :Request, res: Response) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 app.use(cors());
 app.use(express.json());
 
