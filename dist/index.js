@@ -1,21 +1,16 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const client_1 = require("@prisma/client");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-const prisma = new client_1.PrismaClient();
+import express from 'express';
+import cors from 'cors';
+import { PrismaClient, LinkPrecedence } from '@prisma/client';
+import dotenv from 'dotenv';
+dotenv.config();
+const app = express();
+const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
+app.use(cors());
+app.use(express.json());
 // Helper function to get all linked contacts starting from a primary contact
 async function getLinkedContacts(primaryContactId) {
     const contacts = await prisma.contact.findMany({
@@ -91,7 +86,7 @@ app.post('/identify', async (req, res) => {
                 data: {
                     email,
                     phoneNumber: phoneNumber?.toString(),
-                    linkPrecedence: client_1.LinkPrecedence.primary,
+                    linkPrecedence: LinkPrecedence.primary,
                     linkedId: null
                 }
             });
@@ -124,7 +119,7 @@ app.post('/identify', async (req, res) => {
                 await prisma.contact.update({
                     where: { id: primaryToUpdate },
                     data: {
-                        linkPrecedence: client_1.LinkPrecedence.secondary,
+                        linkPrecedence: LinkPrecedence.secondary,
                         linkedId: oldestPrimaryId
                     }
                 });
@@ -148,7 +143,7 @@ app.post('/identify', async (req, res) => {
                     data: {
                         email,
                         phoneNumber: phoneNumber?.toString(),
-                        linkPrecedence: client_1.LinkPrecedence.secondary,
+                        linkPrecedence: LinkPrecedence.secondary,
                         linkedId: oldestPrimaryId
                     }
                 });
@@ -167,5 +162,4 @@ app.post('/identify', async (req, res) => {
 app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Bitespeed Identity Service running on port ${PORT}`);
 });
-exports.default = app;
-//# sourceMappingURL=index.js.map
+export default app;
