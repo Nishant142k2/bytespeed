@@ -12,7 +12,7 @@
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "dev:commonjs": "node --loader ts-node/esm src/index.ts",
-    "render-build": "npm install && npx prisma generate && npm run build",
+    "render-build": "npm cache clean --force && npm install && npx prisma generate && npm run build",
     "render-start": "npx prisma migrate deploy && npm start",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

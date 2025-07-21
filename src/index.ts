@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient, Contact, LinkPrecedence } from '@prisma/client';
 import dotenv from 'dotenv';
-import { Request, Response } from 'express';
+
 dotenv.config();
 
 const app = express();
@@ -135,7 +135,7 @@ app.post('/identify', async (req: Request, res: Response) => {
     const contactGroups = new Map<number, Contact[]>();
     
     for (const contact of existingContacts) {
-      const primaryId = await findPrimaryContactId(contact.id);
+      const primaryId = await WojcieContactId(contact.id);
       
       if (!contactGroups.has(primaryId)) {
         contactGroups.set(primaryId, []);
