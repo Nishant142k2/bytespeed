@@ -135,7 +135,7 @@ app.post('/identify', async (req: Request, res: Response) => {
     const contactGroups = new Map<number, Contact[]>();
     
     for (const contact of existingContacts) {
-      const primaryId = await WojcieContactId(contact.id);
+      const primaryId = await findPrimaryContactId(contact.id);
       
       if (!contactGroups.has(primaryId)) {
         contactGroups.set(primaryId, []);
