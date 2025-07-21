@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient, Contact, LinkPrecedence } from '@prisma/client';
@@ -10,8 +9,7 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
-
-app.get('/health', (req :Request, res: Response) => {
+app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 app.use(cors());
@@ -63,18 +61,21 @@ async function findPrimaryContactId(contactId: number): Promise<number> {
 
 // Helper function to consolidate contact information
 function consolidateContacts(contacts: Contact[]): ContactResponse {
-  const primary = contacts.find(c => c.linkPrecedence === 'primary')!;
+  const primary = contacts.find(c => c.linkPrecedence === 'primary');
+  if (!primary) {
+    throw new Error('No primary contact found');
+  }
   const secondaries = contacts.filter(c => c.linkPrecedence === 'secondary');
   
   const emails = Array.from(new Set([
     primary.email,
     ...secondaries.map(c => c.email)
-  ].filter(Boolean))) as string[];
+  ].filter((email): email is string => Boolean(email))));
   
   const phoneNumbers = Array.from(new Set([
     primary.phoneNumber,
     ...secondaries.map(c => c.phoneNumber)
-  ].filter(Boolean))) as string[];
+  ].filter((phone): phone is string => Boolean(phone))));
   
   return {
     contact: {
@@ -86,7 +87,7 @@ function consolidateContacts(contacts: Contact[]): ContactResponse {
   };
 }
 
-app.post('/identify', async (req, res) => {
+app.post('/identify', async (req: Request, res: Response) => {
   try {
     const { email, phoneNumber }: IdentifyRequest = req.body;
     
@@ -101,7 +102,7 @@ app.post('/identify', async (req, res) => {
       where: {
         OR: [
           ...(email ? [{ email }] : []),
-          ...(phoneNumber ? [{ phoneNumber: phoneNumber?.toString() }] : [])
+          ...(phoneNumber ? [{ phoneNumber: phoneNumber.toString() }] : [])
         ]
       },
       orderBy: {
@@ -134,9 +135,7 @@ app.post('/identify', async (req, res) => {
     const contactGroups = new Map<number, Contact[]>();
     
     for (const contact of existingContacts) {
-      const primaryId = contact.linkPrecedence === 'primary' 
-        ? contact.id 
-        : contact.linkedId!;
+      const primaryId = await findPrimaryContactId(contact.id);
       
       if (!contactGroups.has(primaryId)) {
         contactGroups.set(primaryId, []);
@@ -173,7 +172,7 @@ app.post('/identify', async (req, res) => {
     const allLinkedContacts = await getLinkedContacts(oldestPrimaryId);
     
     const hasEmail = email && allLinkedContacts.some(c => c.email === email);
-    const hasPhone = phoneNumber && allLinkedContacts.some(c => c.phoneNumber === phoneNumber?.toString());
+    const hasPhone = phoneNumber && allLinkedContacts.some(c => c.phoneNumber === phoneNumber.toString());
     
     // Create new secondary contact if we have new information
     if ((email && !hasEmail) || (phoneNumber && !hasPhone)) {
@@ -205,8 +204,6 @@ app.post('/identify', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Bitespeed Identity Service running on port ${PORT}`);
