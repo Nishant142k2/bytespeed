@@ -13,7 +13,7 @@
     "dev": "tsx src/index.ts",
     "dev:commonjs": "node --loader ts-node/esm src/index.ts",
     "render-build": "npm install --include=dev && npx prisma generate && npm run build",
-    "render-start": "npx prisma migrate deploy && npm start",
+    "render-start":  "npx prisma db push --accept-data-loss && npm start",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
