@@ -1,4 +1,4 @@
-#Bitespeed Identity Service
+# Bitespeed Identity Service
 A customer identity tracking web service that consolidates contact information across multiple purchases on FluxKart.com. The service intelligently links contacts based on shared email addresses or phone numbers, maintaining a primary-secondary relationship structure.
 Features
 
